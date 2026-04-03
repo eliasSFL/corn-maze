@@ -1,6 +1,6 @@
 # Sunflower Land — mini-game template
 
-Starter repo for **browser mini-games** set in the Sunflower Land universe. **Default game: Kale Kings** — **React Router** routes **`/`** (kingdom HUD + mock kale count) and **`/adventure`** (Phaser forage: walking **`BumpkinContainer`**, five hidden **`kale`** pickups from **`@sl-assets`**). Other samples live under **`src/examples/`** (Bumpkin maze, **`MainScene`** via **`PhaserGame`**). Includes **Nanostores**, **stub API**, and **Howler** audio.
+Starter repo for **browser mini-games** set in the Sunflower Land universe. **Default sample: Boring** — **React Router** **`/`** (portal session fetch) and **`/game`** (Phaser **`MainScene`** + **`BumpkinContainer`**). Portal API helpers live in **`src/lib/portal/`** (same fetch patterns as Chicken Rescue). Includes **Nanostores**, **`lib/api.ts`** stubs, and **Howler** audio.
 
 ## Quick start
 
@@ -51,7 +51,7 @@ All contributor and **AI-agent-oriented** guidelines live in **`docs/`**:
 3. **`src/config/icons.config.ts`**, **`src/config/resources.config.ts`**, **`src/config/audio.config.ts`** — extend the bundled `@sl-assets` imports (requires sibling **`images`** repo; see above).
 4. **`src/lib/popups.ts`** + **`src/components/popups/popupRegistry.tsx`** — add modal ids and bodies.
 5. **`src/game/`** — add scenes and containers; keep heavy UI in React per `TECHNICAL.md`.
-6. **`src/examples/kale-kings/`** — default **`KaleKingsApp`** in **`App.tsx`** (see `src/examples/README.md`). Swap **`App`** contents for **`PacmanExample`**, **`PhaserGame`**, or your fork.
+6. **`src/examples/boring/`** — default **`BoringApp`** in **`App.tsx`** (see `src/examples/README.md`). Replace **`App`** with your own shell when you outgrow the demo.
 
 ## Included UI primitives
 

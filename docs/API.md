@@ -4,7 +4,7 @@
 
 ## Agent summary
 
-All **remote** I/O for this template goes through **`src/lib/api.ts`**. The file ships with **stubs**, **fake delays**, and **TODO** comments. Player data is mocked with **`coins`** and an **`anonymous`** flag. **Trade** helpers live in the same module (no separate `trade.ts`). Replace stubs with real endpoints when you integrate Sunflower Land services.
+**Portal minigames** use **`src/lib/portal/`** — **`getPlayerEconomySession`** and **`postPlayerEconomyAction`** against `GET/POST …/portal/:portalId/player-economy` (see Chicken Rescue). **Generic profile / trade stubs** live in **`src/lib/api.ts`**: **fake delays**, **TODO** comments, **`coins`**, **`anonymous`**. Replace stubs when you integrate services.
 
 ## Current contract (template)
 

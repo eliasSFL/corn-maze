@@ -18,6 +18,9 @@ declare module "*.webp" {
 interface ImportMetaEnv {
   readonly VITE_ANIMATION_URL?: string;
   readonly VITE_IMAGE_BASE_URL?: string;
+  readonly VITE_API_URL?: string;
+  readonly VITE_PORTAL_APP?: string;
+  readonly VITE_PORTAL_GAME_URL?: string;
 }
 
 interface ImportMeta {

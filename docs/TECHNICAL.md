@@ -16,13 +16,14 @@
 | Layer | Package / file |
 |-------|----------------|
 | UI | React 19, Tailwind, `src/components/ui/*` |
-| Routing | `react-router-dom` (default: Kale Kings in `src/examples/kale-kings/KaleKingsApp.tsx`) |
+| Routing | `react-router-dom` (default: Boring in `src/examples/boring/BoringApp.tsx`) |
 | Game canvas | Phaser 3, `src/game/*`, `src/components/PhaserGame.tsx`, example scenes under `src/examples/*` |
 | Global state | `nanostores`, `src/lib/gameStore.ts` |
 | Popups | `PopupProvider`, `popupSingleton`, `src/lib/popups.ts`, `src/components/popups/*` |
 | Audio | `howler`, `src/lib/audio.ts`, `src/config/audio.config.ts` |
 | Icons | URL config only, `src/config/icons.config.ts`, `src/components/ui/Icon.tsx` |
 | Backend (stub) | `src/lib/api.ts` |
+| Portal / player economy | `src/lib/portal/` (`getPlayerEconomySession`, `postPlayerEconomyAction`) |
 
 ## Phaser × React boundaries
 
@@ -68,17 +69,17 @@
 - UI icons: `src/config/icons.config.ts` → `<Icon name="disc" />` (10 examples included).
 - Materials: `src/config/resources.config.ts` → `<ResourceImage name="wood" />` (10 examples included).
 
-### Optional example: Bumpkin maze (`src/examples/pacman/`)
+### Default sample: Boring (`src/examples/boring/`)
 
-- **`PacmanScene`** preloads from **`icons.config.ts` / `resources.config.ts`** (via **`examples/pacman/pacman.config.ts`**), not ad-hoc URLs.
-- **Walls** = tiled **resource** sprites; **pickups** = **icon** + **resource** keys (`PACMAN_VISUAL`). **Player and chasers** = **`BumpkinContainer`**. Default **`App`** is **`KaleKingsApp`**; **`PacmanExample`** and **`PhaserGame`** + **`MainScene`** are alternates.
+- **`/`** — `BoringSessionContext` calls **`getPlayerEconomySession`** when API base URL + portal JWT are available.
+- **`/game`** — **`PhaserGame`** + **`MainScene`**; bumpkin uses bundled silhouette assets under `public/game/`.
 
 ## Agent checklist (before editing)
 
 1. Read `GAME_SPEC.md` for numbers/copy tied to your change.
 2. Prefer updating **store** over ad-hoc `useState` for data shared with Phaser.
 3. New modal → registry + provider (no stacked modals).
-4. New remote call → extend `api.ts` with typed stub first.
+4. New portal call → extend `src/lib/portal/api.ts` or add a typed helper next to it; generic profile stubs → `api.ts`.
 
 ## Related docs
 

@@ -1,7 +1,7 @@
 import React from "react";
-import { KaleKingsApp } from "examples/kale-kings/KaleKingsApp";
+import { BoringApp } from "examples/boring/BoringApp";
 
-/** Default shell: Kale Kings (`/` kingdom, `/adventure` Phaser hunt). */
+/** Portal demo: `/` welcome + session fetch, `/game` Phaser bumpkin. */
 export const App: React.FC = () => {
-  return <KaleKingsApp />;
+  return <BoringApp />;
 };

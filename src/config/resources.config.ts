@@ -12,7 +12,6 @@ import plot from "@sl-assets/resources/plot.png";
 import stoneSmall from "@sl-assets/resources/stone_small.png";
 import wildMushroom from "@sl-assets/resources/wild_mushroom.png";
 import wood from "@sl-assets/resources/wood.png";
-import kaleKingsKale from "examples/kale-kings/assets/kale.png";
 
 export const RESOURCE_CONFIG = {
   /** Basic building material */
@@ -35,8 +34,6 @@ export const RESOURCE_CONFIG = {
   acorn: { url: acorn, description: "Acorn" },
   /** Bee production building drop */
   beeHive: { url: beeHive, description: "Bee hive" },
-  /** Kale Kings — bundled `src/examples/kale-kings/assets/kale.png` */
-  kale: { url: kaleKingsKale, description: "Kale" },
 } as const;
 
 export type ResourceName = keyof typeof RESOURCE_CONFIG;
