@@ -5,6 +5,7 @@
 
 export interface PlayerProfile {
   coins: number;
+  skulls?: number;
   anonymous: boolean;
 }
 
@@ -17,6 +18,7 @@ export async function loadPlayerProfile(): Promise<PlayerProfile> {
   await delay(350);
   return {
     coins: 0,
+    skulls: 0,
     anonymous: true,
   };
 }

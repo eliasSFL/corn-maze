@@ -1,7 +1,11 @@
-import React, { useCallback, useLayoutEffect, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { popupSingleton } from "lib/popupSingleton";
 import type { PopupId } from "lib/popups";
+import { $activePopupId } from "lib/popupActiveStore";
 import { POPUP_REGISTRY } from "components/popups/popupRegistry";
+import { markHideAndSeekRewardClaimed } from "examples/hideAndSeek/lib/hideAndSeekRoundStore";
+import { resumeHideAndSeekPhaserPhysics } from "examples/hideAndSeek/lib/hideAndSeekSceneRef";
+import { requestClosePortal } from "lib/portal/closePortal";
 
 export function PopupProvider({
   children,
@@ -13,7 +17,18 @@ export function PopupProvider({
     payload?: Record<string, unknown>;
   } | null>(null);
 
-  const close = useCallback(() => setCurrent(null), []);
+  const close = useCallback(() => {
+    setCurrent((prev) => {
+      if (prev?.id === "hideAndSeekClaim") {
+        markHideAndSeekRewardClaimed();
+        resumeHideAndSeekPhaserPhysics();
+      }
+      if (prev?.id === "hideAndSeekGameOver" || prev?.id === "hideAndSeekClaim") {
+        requestClosePortal();
+      }
+      return null;
+    });
+  }, []);
 
   const open = useCallback(
     (id: PopupId, payload?: Record<string, unknown>) => {
@@ -26,6 +41,25 @@ export function PopupProvider({
     popupSingleton.bind(open, close);
     return () => popupSingleton.unbind();
   }, [open, close]);
+
+  useLayoutEffect(() => {
+    $activePopupId.set(current?.id ?? null);
+  }, [current]);
+
+  useEffect(() => {
+    if (!current) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code !== "Space" && e.key !== " ") return;
+      const el = e.target as HTMLElement | null;
+      if (el?.closest("input, textarea, select, [contenteditable=true]")) {
+        return;
+      }
+      e.preventDefault();
+      close();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [current, close]);
 
   const Body = current ? POPUP_REGISTRY[current.id] : null;
 

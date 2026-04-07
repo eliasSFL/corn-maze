@@ -64,6 +64,11 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     scene.add.existing(this);
   }
 
+  /** Animation CDN token segments (`0_v1_${parts}`), for gameplay logic (e.g. identify NPCs). */
+  getBumpkinTokenParts(): string {
+    return this.tokenParts;
+  }
+
   private loadSprites(scene: Phaser.Scene) {
     this.spriteKey = `bumpkin_${this.tokenParts}`;
     this.idleAnimationKey = `${this.spriteKey}-idle`;

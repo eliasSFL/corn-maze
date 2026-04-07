@@ -1,7 +1,7 @@
 import React from "react";
-import { BoringApp } from "examples/boring/BoringApp";
+import { HideAndSeekApp } from "examples/hideAndSeek/HideAndSeekApp";
 
-/** Portal demo: `/` welcome + session fetch, `/game` Phaser bumpkin. */
+/** Hide and Seek: Phaser scene opens at `/`. */
 export const App: React.FC = () => {
-  return <BoringApp />;
+  return <HideAndSeekApp />;
 };
