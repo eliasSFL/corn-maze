@@ -59,3 +59,11 @@ export const pixelGreenBorderStyle: CSSProperties = {
   borderImage: `url(${UI_IMAGES.greenBorder}) 20%`,
   ...pixelizedBorderStyle,
 };
+
+/** Speech-style panel (Chicken Rescue rules copy). */
+export const pixelSpeechBubbleBorderStyle: CSSProperties = {
+  borderImage: `url(${UI_IMAGES.speechBubbleBorder})`,
+  backgroundColor: "white",
+  borderWidth: `${PIXEL_SCALE * 3}px`,
+  ...pixelizedBorderStyle,
+};

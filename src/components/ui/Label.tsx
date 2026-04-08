@@ -78,6 +78,8 @@ interface Props {
   type?: LabelType;
   style?: React.CSSProperties;
   onClick?: () => void;
+  /** Optional leading image (URL) shown inside the label. */
+  icon?: string;
 }
 
 export const Label: React.FC<React.PropsWithChildren<Props>> = ({
@@ -86,13 +88,14 @@ export const Label: React.FC<React.PropsWithChildren<Props>> = ({
   type = "default",
   style,
   onClick,
+  icon,
 }) => {
   return (
     <div
       onClick={onClick}
       className={classnames(
         className,
-        `w-fit justify-center flex items-center text-xs px-[3px]`,
+        `w-fit justify-center flex items-center text-xs px-[3px] gap-1`,
         {
           relative: !className?.includes("absolute"),
           "cursor-pointer": !!onClick,
@@ -105,6 +108,14 @@ export const Label: React.FC<React.PropsWithChildren<Props>> = ({
         ...style,
       }}
     >
+      {icon && (
+        <img
+          src={icon}
+          alt=""
+          className="shrink-0"
+          style={{ width: 14, height: 14, imageRendering: "pixelated" }}
+        />
+      )}
       {children}
     </div>
   );

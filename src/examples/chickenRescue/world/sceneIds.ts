@@ -1,0 +1,20 @@
+/** Scene keys shared by maps / Phaser (MMO colyseus removed for this template port). */
+export type SceneId =
+  | "plaza"
+  | "auction_house"
+  | "clothes_shop"
+  | "decorations_shop"
+  | "windmill_floor"
+  | "woodlands"
+  | "beach"
+  | "crop_boom"
+  | "mushroom_forest"
+  | "retreat"
+  | "chicken_rescue"
+  | "kingdom"
+  | "faction_house"
+  | "goblin_house"
+  | "sunflorian_house"
+  | "nightshade_house"
+  | "bumpkin_house"
+  | "portal_example";

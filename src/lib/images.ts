@@ -9,6 +9,7 @@ export function imageBaseUrl(): string {
 export const UI_IMAGES = {
   primaryButton: `${imageBaseUrl()}/ui/light_button.png`,
   primaryButtonPressed: `${imageBaseUrl()}/ui/light_button_pressed.png`,
+  selectBox: `${imageBaseUrl()}/ui/select_box.png`,
   grayBorder: `${imageBaseUrl()}/ui/panel/gray_border.png`,
   orangeBorder: `${imageBaseUrl()}/ui/panel/orange_border.png`,
   redBorder: `${imageBaseUrl()}/ui/panel/danger_border.png`,
@@ -19,4 +20,5 @@ export const UI_IMAGES = {
   lightBorder: `${imageBaseUrl()}/ui/panel/light_border.png`,
   darkBorder: `${imageBaseUrl()}/ui/panel/dark_border.png`,
   greenBorder: `${imageBaseUrl()}/ui/panel/green_border.png`,
+  speechBubbleBorder: `${imageBaseUrl()}/ui/speech_bubble.webp`,
 } as const;

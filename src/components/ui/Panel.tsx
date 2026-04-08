@@ -1,11 +1,18 @@
 import React from "react";
 import classNames from "classnames";
-import { pixelDarkBorderStyle, pixelLightBorderStyle } from "lib/style";
+import {
+  pixelDarkBorderStyle,
+  pixelLightBorderStyle,
+} from "lib/style";
 import { PIXEL_SCALE } from "lib/constants";
+import { UI_IMAGES } from "lib/images";
+import type { Equipped } from "features/game/types/bumpkin";
 
 export interface PanelProps extends React.HTMLAttributes<HTMLDivElement> {
   hasTabs?: boolean;
   tabAlignment?: "top" | "left";
+  /** Accepted for parity with main-game panels (optional decoration). */
+  bumpkinParts?: Partial<Equipped>;
 }
 
 export const InnerPanel: React.FC<
@@ -74,5 +81,52 @@ export const Panel: React.FC<React.PropsWithChildren<PanelProps>> = ({
     <OuterPanel hasTabs={hasTabs} {...divProps}>
       <InnerPanel>{children}</InnerPanel>
     </OuterPanel>
+  );
+};
+
+type ButtonPanelProps = React.HTMLAttributes<HTMLDivElement>;
+
+export const ButtonPanel: React.FC<
+  ButtonPanelProps & { disabled?: boolean; selected?: boolean }
+> = ({ children, disabled, selected, className, style, ...otherDivProps }) => {
+  return (
+    <div
+      className={classNames(
+        className,
+        "hover:brightness-90 cursor-pointer relative",
+        { "opacity-50": !!disabled },
+      )}
+      style={{
+        padding: `${PIXEL_SCALE * 1}px`,
+        borderImage: `url(${UI_IMAGES.primaryButton})`,
+        borderStyle: "solid",
+        borderWidth: "8px 8px 10px 8px",
+        borderImageSlice: "3 3 4 3 fill",
+        imageRendering: "pixelated",
+        borderImageRepeat: "stretch",
+        color: "#674544",
+        ...style,
+      }}
+      {...otherDivProps}
+    >
+      {children}
+      {selected && (
+        <div
+          className="absolute"
+          style={{
+            borderImage: `url(${UI_IMAGES.selectBox})`,
+            borderStyle: "solid",
+            borderWidth: "18px 16px 18px",
+            borderImageSlice: "9 8 9 8 fill",
+            imageRendering: "pixelated",
+            borderImageRepeat: "stretch",
+            top: `${PIXEL_SCALE * -4}px`,
+            right: `${PIXEL_SCALE * -4}px`,
+            left: `${PIXEL_SCALE * -4}px`,
+            bottom: `${PIXEL_SCALE * -4}px`,
+          }}
+        />
+      )}
+    </div>
   );
 };

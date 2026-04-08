@@ -1,7 +1,7 @@
 import React from "react";
-import { HideAndSeekApp } from "examples/hideAndSeek/HideAndSeekApp";
+import { ChickenRescueApp } from "examples/chickenRescue/ChickenRescue";
 
-/** Hide and Seek: Phaser scene opens at `/`. */
+/** Default template example: Chicken Rescue (portal session + Phaser). */
 export const App: React.FC = () => {
-  return <HideAndSeekApp />;
+  return <ChickenRescueApp />;
 };

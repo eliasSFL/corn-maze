@@ -4,3 +4,7 @@ export * from "./api";
 export * from "./url";
 export * from "./decodePortalToken";
 export * from "./closePortal";
+export * from "./runtimeHelpers";
+export * from "./sessionProvider";
+export * from "./minigamePortalProvider";
+export * from "./exit";
