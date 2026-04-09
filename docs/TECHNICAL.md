@@ -16,7 +16,7 @@
 | Layer | Package / file |
 |-------|----------------|
 | UI | React 19, Tailwind, `src/components/ui/*` |
-| Routing | `react-router-dom` (default: Boring in `src/examples/boring/BoringApp.tsx`) |
+| Routing | `react-router-dom` (default: `ChickenRescueApp` in `src/examples/chickenRescue/ChickenRescue.tsx`) |
 | Game canvas | Phaser 3, `src/game/*`, `src/components/PhaserGame.tsx`, example scenes under `src/examples/*` |
 | Global state | `nanostores`, `src/lib/gameStore.ts` |
 | Popups | `PopupProvider`, `popupSingleton`, `src/lib/popups.ts`, `src/components/popups/*` |

@@ -162,7 +162,12 @@ export function applyOptimisticPortalAction(
   },
   economyItems?: PlayerEconomyConfig["items"],
 ):
-  | { ok: true; playerEconomy: MinigameSessionResponse["playerEconomy"] }
+  | {
+      ok: true;
+      playerEconomy: MinigameSessionResponse["playerEconomy"];
+      collectGrants?: { token: string; amount: number }[];
+      generatorJobId?: string;
+    }
   | { ok: false; error: string } {
   const now = input.now ?? Date.now();
   const config: MinigameConfig = {
@@ -179,7 +184,16 @@ export function applyOptimisticPortalAction(
   if (!result.ok) {
     return result;
   }
-  return { ok: true, playerEconomy: runtimeToMinigameSession(result.state) };
+  return {
+    ok: true,
+    playerEconomy: runtimeToMinigameSession(result.state),
+    ...(result.collectGrants !== undefined
+      ? { collectGrants: result.collectGrants }
+      : {}),
+    ...(result.generatorJobId !== undefined
+      ? { generatorJobId: result.generatorJobId }
+      : {}),
+  };
 }
 
 export function emptySessionMinigame(

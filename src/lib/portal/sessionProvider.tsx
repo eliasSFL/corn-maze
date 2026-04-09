@@ -13,6 +13,7 @@ import type {
   MinigameSessionResponse,
 } from "./types";
 import { postPlayerEconomyAction } from "./api";
+import { PLAYER_ECONOMY_GENERATOR_COLLECTED_ACTION } from "./playerEconomyTypes";
 import {
   applyOptimisticPortalAction,
   cloneMinigameSnapshot,
@@ -20,18 +21,41 @@ import {
   normalizeMinigameFromApi,
 } from "./runtimeHelpers";
 
-export type DispatchMinigameActionInput = {
-  action: string;
-  amounts?: Record<string, number>;
-  itemId?: string;
+/**
+ * Payload the session will send on `POST /action` after an optimistic update.
+ * Use `collectJobId` for generator harvest (`generator.collected`), not a fake `action` id.
+ */
+export type PortalEconomySyncInput =
+  | { action: string; amounts?: Record<string, number> }
+  | { collectJobId: string };
+
+export type DispatchMinigameActionInput = PortalEconomySyncInput;
+
+export type CommitLocalPlayerEconomyInput = PortalEconomySyncInput & {
+  nextPlayerEconomy: MinigameSessionResponse["playerEconomy"];
 };
 
-export type CommitLocalPlayerEconomyInput = {
-  nextPlayerEconomy: MinigameSessionResponse["playerEconomy"];
-  action: string;
+function portalSyncToOptimistic(input: PortalEconomySyncInput): {
+  actionId: string;
   amounts?: Record<string, number>;
   itemId?: string;
-};
+} {
+  if ("collectJobId" in input) {
+    return {
+      actionId: PLAYER_ECONOMY_GENERATOR_COLLECTED_ACTION,
+      itemId: input.collectJobId,
+    };
+  }
+  return { actionId: input.action, amounts: input.amounts };
+}
+
+export type DispatchMinigameActionResult =
+  | {
+      ok: true;
+      collectGrants?: { token: string; amount: number }[];
+      generatorJobId?: string;
+    }
+  | { ok: false; error: string };
 
 export type MinigameSessionValue = {
   farmId: number;
@@ -42,13 +66,13 @@ export type MinigameSessionValue = {
   farm: MinigameSessionResponse["farm"];
   playerEconomy: MinigameSessionResponse["playerEconomy"];
   actions: Record<string, unknown>;
-  dispatchAction: (input: DispatchMinigameActionInput) => boolean;
+  dispatchAction: (input: DispatchMinigameActionInput) => DispatchMinigameActionResult;
   commitLocalPlayerEconomySync: (
     input: CommitLocalPlayerEconomyInput,
   ) => boolean;
   dispatchMinigameActionsSequential: (
     inputs: DispatchMinigameActionInput[],
-  ) => boolean;
+  ) => DispatchMinigameActionResult;
   /** Apply economy from an authoritative API response without sending another POST. */
   replacePlayerEconomy: (
     next: MinigameSessionResponse["playerEconomy"],
@@ -83,11 +107,7 @@ export function MinigameSessionProvider({
     (
       rollback: MinigameSessionResponse["playerEconomy"],
       nextEconomy: MinigameSessionResponse["playerEconomy"],
-      input: {
-        action: string;
-        amounts?: Record<string, number>;
-        itemId?: string;
-      },
+      input: PortalEconomySyncInput,
     ) => {
       flushSync(() => {
         setPlayerEconomy(nextEconomy);
@@ -97,12 +117,19 @@ export function MinigameSessionProvider({
         return;
       }
 
-      void postPlayerEconomyAction({
-        token: bootstrap.jwt as string,
-        action: input.action,
-        amounts: input.amounts,
-        itemId: input.itemId,
-      }).then(
+      const postPromise =
+        "collectJobId" in input
+          ? postPlayerEconomyAction({
+              token: bootstrap.jwt as string,
+              itemId: input.collectJobId,
+            })
+          : postPlayerEconomyAction({
+              token: bootstrap.jwt as string,
+              action: input.action,
+              amounts: input.amounts,
+            });
+
+      void postPromise.then(
         (res) => {
           setPlayerEconomy((prev) =>
             mergeMinigameEconomyFromApi(prev, res.playerEconomy),
@@ -122,32 +149,38 @@ export function MinigameSessionProvider({
     (input: CommitLocalPlayerEconomyInput): boolean => {
       setApiError(null);
       const rollback = cloneMinigameSnapshot(playerEconomy);
-      const nextEconomy = cloneMinigameSnapshot(input.nextPlayerEconomy);
-      runAfterLocalEconomyCommit(rollback, nextEconomy, input);
+      const { nextPlayerEconomy, ...sync } = input;
+      const nextEconomy = cloneMinigameSnapshot(nextPlayerEconomy);
+      runAfterLocalEconomyCommit(rollback, nextEconomy, sync);
       return true;
     },
     [playerEconomy, runAfterLocalEconomyCommit],
   );
 
   const dispatchAction = useCallback(
-    (input: DispatchMinigameActionInput): boolean => {
+    (input: DispatchMinigameActionInput): DispatchMinigameActionResult => {
       setApiError(null);
       const rollback = cloneMinigameSnapshot(playerEconomy);
+      const optimistic = portalSyncToOptimistic(input);
       const next = applyOptimisticPortalAction(
         bootstrap.actions,
         playerEconomy,
         {
-          actionId: input.action,
-          amounts: input.amounts,
-          itemId: input.itemId,
+          actionId: optimistic.actionId,
+          amounts: optimistic.amounts,
+          itemId: optimistic.itemId,
         },
         bootstrap.economyMeta?.items,
       );
       if (!next.ok) {
-        return false;
+        return { ok: false, error: next.error };
       }
       runAfterLocalEconomyCommit(rollback, next.playerEconomy, input);
-      return true;
+      return {
+        ok: true,
+        collectGrants: next.collectGrants,
+        generatorJobId: next.generatorJobId,
+      };
     },
     [
       bootstrap.actions,
@@ -158,52 +191,61 @@ export function MinigameSessionProvider({
   );
 
   const dispatchMinigameActionsSequential = useCallback(
-    (inputs: DispatchMinigameActionInput[]): boolean => {
+    (inputs: DispatchMinigameActionInput[]): DispatchMinigameActionResult => {
       if (inputs.length === 0) {
-        return true;
+        return { ok: true };
       }
       setApiError(null);
       const rollback = cloneMinigameSnapshot(playerEconomy);
       let current = playerEconomy;
       let applied = 0;
+      let lastOk: DispatchMinigameActionResult = { ok: true };
       for (const input of inputs) {
+        const optimistic = portalSyncToOptimistic(input);
         const next = applyOptimisticPortalAction(
           bootstrap.actions,
           current,
           {
-            actionId: input.action,
-            amounts: input.amounts,
-            itemId: input.itemId,
+            actionId: optimistic.actionId,
+            amounts: optimistic.amounts,
+            itemId: optimistic.itemId,
           },
           bootstrap.economyMeta?.items,
         );
         if (!next.ok) {
+          lastOk = { ok: false, error: next.error };
           break;
         }
         current = next.playerEconomy;
         applied += 1;
+        lastOk = {
+          ok: true,
+          collectGrants: next.collectGrants,
+          generatorJobId: next.generatorJobId,
+        };
       }
       if (applied === 0) {
-        return false;
+        return lastOk.ok ? { ok: false, error: "No actions applied" } : lastOk;
       }
       flushSync(() => {
         setPlayerEconomy(current);
       });
 
       if (!getMinigamesApiUrl()) {
-        return true;
+        return lastOk;
       }
 
       void (async () => {
         let state = rollback;
         for (const input of inputs) {
+          const optimistic = portalSyncToOptimistic(input);
           const step = applyOptimisticPortalAction(
             bootstrap.actions,
             state,
             {
-              actionId: input.action,
-              amounts: input.amounts,
-              itemId: input.itemId,
+              actionId: optimistic.actionId,
+              amounts: optimistic.amounts,
+              itemId: optimistic.itemId,
             },
             bootstrap.economyMeta?.items,
           );
@@ -211,12 +253,17 @@ export function MinigameSessionProvider({
             break;
           }
           try {
-            const res = await postPlayerEconomyAction({
-              token: bootstrap.jwt as string,
-              action: input.action,
-              amounts: input.amounts,
-              itemId: input.itemId,
-            });
+            const res =
+              "collectJobId" in input
+                ? await postPlayerEconomyAction({
+                    token: bootstrap.jwt as string,
+                    itemId: input.collectJobId,
+                  })
+                : await postPlayerEconomyAction({
+                    token: bootstrap.jwt as string,
+                    action: input.action,
+                    amounts: input.amounts,
+                  });
             state = mergeMinigameEconomyFromApi(state, res.playerEconomy);
           } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
@@ -227,7 +274,7 @@ export function MinigameSessionProvider({
         }
         setPlayerEconomy(state);
       })();
-      return true;
+      return lastOk;
     },
     [bootstrap.actions, bootstrap.economyMeta?.items, bootstrap.jwt, playerEconomy],
   );

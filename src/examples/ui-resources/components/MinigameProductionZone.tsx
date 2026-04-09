@@ -32,7 +32,6 @@ import type { PlayerEconomyCollectGrant } from "../lib/types";
 import { MinigameScaledSpriteImg } from "./MinigameScaledSpriteImg";
 import { Box } from "components/ui/Box";
 import Decimal from "decimal.js-light";
-
 type Props = {
   entries: GeneratorProductionEntry[];
   config: PlayerEconomyConfig;
@@ -44,12 +43,11 @@ type Props = {
     slot: CapBalanceProductionSlot,
     jobId: string | undefined,
   ) => void;
-  dispatchAction: (input: {
-    actionId: string;
-    itemId?: string;
-    amounts?: Record<string, number>;
-    syncCollectWithServer?: boolean;
-  }) => Promise<PlayerEconomyProcessResult>;
+  dispatchAction: (
+    input:
+      | { action: string; amounts?: Record<string, number> }
+      | { collectJobId: string; syncCollectWithServer?: boolean },
+  ) => Promise<PlayerEconomyProcessResult>;
 };
 
 export const MinigameProductionZone: React.FC<Props> = ({
@@ -119,7 +117,7 @@ export const MinigameProductionZone: React.FC<Props> = ({
     async (slot: CapBalanceProductionSlot): Promise<boolean> => {
       if (!isProductionSlotConfigured(slot)) return false;
       const result = await latestDispatchRef.current({
-        actionId: slot.startActionId,
+        action: slot.startActionId,
       });
       if (!result.ok) {
         setStartError(result.error);
@@ -173,8 +171,7 @@ export const MinigameProductionZone: React.FC<Props> = ({
       setStartError(null);
       try {
         const result = await latestDispatchRef.current({
-          actionId: slot.collectActionId,
-          itemId: jobId,
+          collectJobId: jobId,
           syncCollectWithServer: useReveal,
         });
         if (!result.ok) {

@@ -1,4 +1,5 @@
 import type { MinigameSessionResponse, MinigameActionResponse } from "./types";
+import { PLAYER_ECONOMY_GENERATOR_COLLECTED_ACTION } from "./playerEconomyTypes";
 import { getMinigamesApiUrl } from "./url";
 
 export async function getPlayerEconomySession({
@@ -48,23 +49,41 @@ export async function getPlayerEconomySession({
   return parsed.data;
 }
 
-export async function postPlayerEconomyAction({
-  token,
-  action,
-  itemId,
-  amounts,
-}: {
-  token: string;
-  action: string;
-  itemId?: string;
-  amounts?: Record<string, number>;
-}): Promise<MinigameActionResponse> {
+/**
+ * Minigames `POST /action`:
+ * - `{ itemId }` → `{ "type": "generator.collected", "itemId" }` (finish a generator job).
+ * - `{ action, amounts? }` → `{ "type": "minigame.action", "action", "amounts"? }` (named economy action).
+ */
+export async function postPlayerEconomyAction(
+  params:
+    | { token: string; itemId: string }
+    | { token: string; action: string; amounts?: Record<string, number> },
+): Promise<MinigameActionResponse> {
   const base = getMinigamesApiUrl();
   if (!base) {
     throw new Error(
       "No Minigames API URL (set VITE_MINIGAMES_API_URL or pass minigamesApiUrl=…)",
     );
   }
+
+  const { token, ...rest } = params;
+  const body =
+    "itemId" in rest
+      ? (() => {
+          const itemId = rest.itemId.trim();
+          if (!itemId) {
+            throw new Error("itemId is required for generator.collected");
+          }
+          return {
+            type: PLAYER_ECONOMY_GENERATOR_COLLECTED_ACTION,
+            itemId,
+          };
+        })()
+      : {
+          type: "minigame.action" as const,
+          action: rest.action,
+          ...(rest.amounts !== undefined ? { amounts: rest.amounts } : {}),
+        };
 
   const response = await window.fetch(`${base}/action`, {
     method: "POST",
@@ -73,12 +92,7 @@ export async function postPlayerEconomyAction({
       accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      type: "minigame.action",
-      action,
-      ...(itemId !== undefined ? { itemId } : {}),
-      ...(amounts !== undefined ? { amounts } : {}),
-    }),
+    body: JSON.stringify(body),
   });
 
   const bodyText = await response.text();

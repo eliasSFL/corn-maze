@@ -1,6 +1,6 @@
 # Sunflower Land — mini-game template
 
-Starter repo for **browser mini-games** set in the Sunflower Land universe. **Default sample: Boring** — **React Router** **`/`** (Minigames API session fetch) and **`/game`** (Phaser **`MainScene`** + **`BumpkinContainer`**). Portal helpers in **`src/lib/portal/`** match **Chicken Rescue v2** (`VITE_MINIGAMES_API_URL`, `GET /data?type=session`, `POST /action`). Includes **Nanostores**, **`lib/api.ts`** stubs, and **Howler** audio.
+Starter repo for **browser mini-games** set in the Sunflower Land universe. **Default sample in `App.tsx`:** **`ChickenRescueApp`** (`examples/chickenRescue/`) — Phaser game with portal JWT + Minigames session. Other samples live under **`examples/`** (e.g. **`ui-resources/`** dashboard); swap the import in **`App.tsx`** to try them. Portal helpers in **`src/lib/portal/`** match **Chicken Rescue v2** (`VITE_MINIGAMES_API_URL`, `GET /data?type=session`, `POST /action`). Includes **Nanostores**, **`lib/api.ts`** stubs, and **Howler** audio.
 
 ## Quick start
 

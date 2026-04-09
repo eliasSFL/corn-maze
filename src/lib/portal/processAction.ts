@@ -8,6 +8,7 @@ export * from "./playerEconomyTypes";
 
 export {
   processPlayerEconomyAction,
+  processPlayerEconomyGeneratorCollect,
   emptyPlayerEconomyState,
   utcCalendarDay,
   rolloverDailyMintedIfNeeded,

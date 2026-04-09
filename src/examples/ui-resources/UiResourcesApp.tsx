@@ -13,7 +13,9 @@ import {
  * Player-economy dashboard minigame: renders whatever the Minigames session returns
  * (`actions`, `items`, generator rules, …). Offline stub included when no API URL.
  *
- * Swap this in for {@link examples/chickenRescue/ChickenRescueApp} in `App.tsx` to try it.
+ * Mount from `App.tsx` instead of `ChickenRescueApp` when you want this dashboard shell.
+ *
+ * Paste/upload the bundled sample config: `ui-resources-editor-sample.json` (same folder as this file).
  */
 export const UiResourcesApp: React.FC = () => {
   return (

@@ -6,7 +6,7 @@
 
 Before changing code, update this spec when you alter: **starting resources**, **win/lose conditions**, **timers**, **costs**, **enemy counts**, or **progression tiers**. Agents should read this file when implementing balance or UI copy tied to rules.
 
-**Default shell:** `App` renders **`BoringApp`** — **`/`** loads the Minigames API player-economy session (when `VITE_MINIGAMES_API_URL` / `?minigamesApiUrl=` + JWT are configured), **`/game`** runs **`PhaserGame`** / **`MainScene`** (walking bumpkin).
+**Default shell:** `App` renders **`ChickenRescueApp`** (Phaser + portal session). Swap in **`UiResourcesApp`** or another example from **`src/examples/`** in **`App.tsx`** when building a different mini-game.
 
 When changing **Phaser visuals**, read **`ART.md`** and keep gameplay art mapped to **`icons.config.ts` / `resources.config.ts`** (`@sl-assets`) where possible — avoid one-off URLs or vector-drawn gameplay tiles where pixel assets exist.
 
@@ -40,7 +40,7 @@ When changing **Phaser visuals**, read **`ART.md`** and keep gameplay art mapped
 
 ## Boring (`src/examples/boring/`)
 
-> **Loaded by default** via **`BoringApp`**. Session fetch: **`BoringSessionContext`** + **`getPlayerEconomySession`**. Example action **definitions** (not wired to POST yet): **`boring/lib/boringClientActions.ts`**.
+> Optional sample (mount **`BoringApp`** from **`App.tsx`** if present in your fork). Session fetch: portal helpers + **`getPlayerEconomySession`**. Example action **definitions** (not wired to POST yet): **`boring/lib/boringClientActions.ts`**.
 
 ### Pitch
 

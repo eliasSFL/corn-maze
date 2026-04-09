@@ -21,6 +21,7 @@ import { postPlayerEconomyAction } from "lib/portal/api";
 import { getMinigamesApiUrl } from "lib/portal/url";
 import {
   processPlayerEconomyAction,
+  processPlayerEconomyGeneratorCollect,
   type PlayerEconomyActionDefinition,
   type PlayerEconomyConfig,
 } from "lib/portal/processAction";
@@ -196,26 +197,36 @@ export const UiResourcesDashboard: React.FC = () => {
   );
 
   const runMinigameAction = useCallback(
-    async (input: {
-      actionId: string;
-      itemId?: string;
-      amounts?: Record<string, number>;
-      syncCollectWithServer?: boolean;
-    }): Promise<PlayerEconomyProcessResult> => {
+    async (
+      input:
+        | { action: string; amounts?: Record<string, number> }
+        | {
+            collectJobId: string;
+            syncCollectWithServer?: boolean;
+          },
+    ): Promise<PlayerEconomyProcessResult> => {
       const prev = mergeRuntimeWithInitialBalances(
         config,
         minigameSessionToRuntime(playerEconomy, Date.now()),
       );
-      const local = processPlayerEconomyAction(config, prev, {
-        actionId: input.actionId,
-        itemId: input.itemId,
-        amounts: input.amounts,
-        now: Date.now(),
-      });
+      const nowMs = Date.now();
+      const local =
+        "collectJobId" in input
+          ? processPlayerEconomyGeneratorCollect(
+              config,
+              prev,
+              input.collectJobId.trim(),
+              nowMs,
+            )
+          : processPlayerEconomyAction(config, prev, {
+              actionId: input.action,
+              amounts: input.amounts,
+              now: nowMs,
+            });
       if (!local.ok) return local;
 
       const useServerCollect =
-        Boolean(input.itemId?.trim()) &&
+        "collectJobId" in input &&
         input.syncCollectWithServer === true &&
         Boolean(getMinigamesApiUrl() && jwt);
 
@@ -223,9 +234,7 @@ export const UiResourcesDashboard: React.FC = () => {
         try {
           const data = await postPlayerEconomyAction({
             token: jwt,
-            action: input.actionId,
-            itemId: input.itemId,
-            amounts: input.amounts,
+            itemId: input.collectJobId.trim(),
           });
           const mergedPe = mergeMinigameEconomyFromApi(
             runtimeToMinigameSession(prev),
@@ -250,12 +259,18 @@ export const UiResourcesDashboard: React.FC = () => {
         }
       }
 
-      commitLocalPlayerEconomySync({
-        nextPlayerEconomy: runtimeToMinigameSession(local.state),
-        action: input.actionId,
-        amounts: input.amounts,
-        itemId: input.itemId,
-      });
+      if ("collectJobId" in input) {
+        commitLocalPlayerEconomySync({
+          nextPlayerEconomy: runtimeToMinigameSession(local.state),
+          collectJobId: input.collectJobId,
+        });
+      } else {
+        commitLocalPlayerEconomySync({
+          nextPlayerEconomy: runtimeToMinigameSession(local.state),
+          action: input.action,
+          amounts: input.amounts,
+        });
+      }
 
       return {
         ok: true,

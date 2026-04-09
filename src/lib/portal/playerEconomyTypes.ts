@@ -122,12 +122,18 @@ export type PlayerEconomyConfig = {
   mainCurrencyToken?: string;
 };
 
+/** Virtual action id for completing a generator job (POST body `type: "generator.collected"`). */
+export const PLAYER_ECONOMY_GENERATOR_COLLECTED_ACTION =
+  "generator.collected" as const;
+
 export type GeneratorJob = {
   outputToken: string;
   startedAt: number;
   completesAt: number;
   /** When set, this job counts only toward that cap lane (see `GeneratorRecipeRule.requires`). */
   requires?: string;
+  /** Action that created this job; used to resolve `collect` rules on harvest. */
+  sourceActionId?: string;
 };
 
 export type DailyMintBucket = {

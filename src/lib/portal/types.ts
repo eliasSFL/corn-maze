@@ -32,6 +32,7 @@ export type MinigameSessionResponse = {
         startedAt: number;
         completesAt: number;
         requires?: string;
+        sourceActionId?: string;
       }
     >;
     activity: number;
@@ -55,6 +56,10 @@ export type MinigameSessionResponse = {
 };
 
 export type MinigameActionResponse = {
+  /** Full session-shaped payload after the action (same shape as GET session `data`). */
+  economy: MinigameSessionResponse;
+  /** Per-token balance deltas (after − before); non-zero entries only. */
+  changeset: { balances: Record<string, number> };
   playerEconomy: MinigameSessionResponse["playerEconomy"];
   generatorJobId?: string;
   collectGrants?: { token: string; amount: number }[];

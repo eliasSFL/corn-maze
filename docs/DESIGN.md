@@ -6,7 +6,7 @@
 
 Mini-games are set in **Sunflower Land**: a **web3 farming community** with friendly **Bumpkin** characters. Tone is **brief** and **PG**. Prefer **resource and grind** loops over pure physics gimmicks. Use a **30° top-down** presentation: **walk-around / light RPG** feel, **not** platformers, side-on, or pure top-down shooters. Aim for a **10-second** understood loop and **60-second** first completion where possible.
 
-The default **Boring** sample uses **`BumpkinContainer`** in **`MainScene`** (see **`GAME_SPEC.md`**). Add **`@sl-assets`** pickups in your own scenes as needed.
+The default **Chicken Rescue** sample is a Phaser game under **`examples/chickenRescue/`** (see **`GAME_SPEC.md`**). The **`boring/`** example (if present) uses **`BumpkinContainer`** in **`MainScene`**. Add **`@sl-assets`** pickups in your own scenes as needed.
 
 ## Setting & tone
 

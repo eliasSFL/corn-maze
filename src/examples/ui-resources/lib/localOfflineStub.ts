@@ -3,6 +3,8 @@ import type { MinigameSessionResponse } from "lib/portal/types";
 import { emptySessionMinigame } from "lib/portal/runtimeHelpers";
 import { uiResourcesDemoItemImages } from "./cdnItemImages";
 
+/** Editor-ready single JSON: `examples/ui-resources/ui-resources-editor-sample.json` */
+
 const day = () => new Date().toISOString().slice(0, 10);
 
 function demoItems(): MinigameSessionEconomyMeta["items"] {

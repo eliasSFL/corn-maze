@@ -12,6 +12,7 @@ import {
   MintRule,
   GeneratorRecipeRule,
   RequireRule,
+  PLAYER_ECONOMY_GENERATOR_COLLECTED_ACTION,
 } from "./playerEconomyTypes";
 
 /** User-facing label for a balance token; uses `items[token].name` when present. */
@@ -198,6 +199,30 @@ function newProducingJobId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
+function findCollectDefinitionForJob(
+  config: PlayerEconomyConfig,
+  job: PlayerEconomyRuntimeState["generating"][string],
+): PlayerEconomyActionDefinition | undefined {
+  if (job.sourceActionId) {
+    const d = config.actions[job.sourceActionId];
+    if (d?.collect?.[job.outputToken]) return d;
+  }
+  for (const def of Object.values(config.actions)) {
+    const p = def.produce ?? {};
+    if (!def.collect?.[job.outputToken]) continue;
+    if (p[job.outputToken] !== undefined) return def;
+  }
+  for (const def of Object.values(config.actions)) {
+    if (
+      def.collect?.[job.outputToken] &&
+      (!def.produce || Object.keys(def.produce).length === 0)
+    ) {
+      return def;
+    }
+  }
+  return undefined;
+}
+
 function applyProduce(
   config: PlayerEconomyConfig,
   balances: Record<string, number>,
@@ -205,6 +230,7 @@ function applyProduce(
   produce: Record<string, GeneratorRecipeRule> | undefined,
   collect: Record<string, CollectRule> | undefined,
   now: number,
+  sourceActionId: string,
 ): { error?: string; generatorJobId?: string } {
   if (!produce) return {};
   for (const [outputToken, rule] of Object.entries(produce)) {
@@ -235,10 +261,45 @@ function applyProduce(
       startedAt: now,
       completesAt: now + durationMs,
       ...(rule.requires !== undefined ? { requires: rule.requires } : {}),
+      sourceActionId,
     };
     return { generatorJobId: id };
   }
   return {};
+}
+
+export function processPlayerEconomyGeneratorCollect(
+  config: PlayerEconomyConfig,
+  state: PlayerEconomyRuntimeState,
+  itemId: string,
+  now: number,
+): PlayerEconomyProcessResult {
+  const working = clonePlayerEconomyRuntimeState(state);
+  rolloverDailyMintedIfNeeded(working.dailyMinted, now);
+  const job = working.generating[itemId];
+  if (!job) {
+    return { ok: false, error: "Unknown production id" };
+  }
+  const def = findCollectDefinitionForJob(config, job);
+  if (!def?.collect) {
+    return { ok: false, error: "Collect is not configured for this job" };
+  }
+  const collectResult = applyCollect(
+    working.balances,
+    working.generating,
+    def.collect,
+    itemId,
+    now,
+  );
+  if ("error" in collectResult) {
+    return { ok: false, error: collectResult.error };
+  }
+  recordSuccessfulMinigameAction(working, now);
+  return {
+    ok: true,
+    state: working,
+    collectGrants: collectResult.grants,
+  };
 }
 
 function applyMint(
@@ -442,28 +503,12 @@ function runPhases(
 } {
   const hasProduce = Object.keys(def.produce ?? {}).length > 0;
   const hasCollect = Object.keys(def.collect ?? {}).length > 0;
-  const itemId = input.itemId?.trim();
-
-  /** With `itemId`, only the collect phase runs (same action id as start for unified configs). */
-  if (itemId) {
-    if (!hasCollect) {
-      return { error: "itemId is not valid for this action" };
-    }
-    const collectResult = applyCollect(
-      working.balances,
-      working.generating,
-      def.collect,
-      itemId,
-      input.now,
-    );
-    if ("error" in collectResult) {
-      return { error: collectResult.error };
-    }
-    return { collectGrants: collectResult.grants };
-  }
 
   if (hasCollect && !hasProduce) {
-    return { error: "itemId is required for collect" };
+    return {
+      error:
+        "This action only defines collect rules; use generator.collected with itemId to harvest",
+    };
   }
 
   const errRequire = applyRequire(config, working.balances, def.require);
@@ -493,6 +538,7 @@ function runPhases(
     def.produce,
     def.collect,
     input.now,
+    input.actionId,
   );
   if (prod.error) return { error: prod.error };
 
@@ -514,6 +560,14 @@ export function processPlayerEconomyAction(
   state: PlayerEconomyRuntimeState,
   input: PlayerEconomyProcessInput,
 ): PlayerEconomyProcessResult {
+  if (input.actionId === PLAYER_ECONOMY_GENERATOR_COLLECTED_ACTION) {
+    const jid = input.itemId?.trim();
+    if (!jid) {
+      return { ok: false, error: "itemId is required" };
+    }
+    return processPlayerEconomyGeneratorCollect(config, state, jid, input.now);
+  }
+
   const def = config.actions[input.actionId];
   if (!def) {
     return { ok: false, error: `Unknown action ${input.actionId}` };

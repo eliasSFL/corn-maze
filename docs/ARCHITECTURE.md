@@ -7,7 +7,7 @@
 
 - **`src/components/`** — React UI: `ui/` primitives, `popups/`, `PhaserGame.tsx`.
 - **`src/game/`** — Phaser scenes and game objects (`BumpkinContainer`, `MainScene`).
-- **`src/examples/`** — **`boring/`** (default **`BoringApp`**); **`PhaserGame`** mounts **`MainScene`**.
+- **`src/examples/`** — **`chickenRescue/`** (default **`ChickenRescueApp`** in **`App.tsx`**); optional **`boring/`**, **`ui-resources/`**, etc.
 - **`src/lib/`** — App logic: `api.ts`, `config.ts`, `portal/`, `gameStore.ts`, `popupSingleton.ts`, `popups.ts`, `audio.ts`.
 - **`src/config/`** — **`icons.config.ts`**, **`resources.config.ts`**, **`audio.config.ts`** (static imports from sibling **`../images/assets`** via `@sl-assets`).
 - **`docs/`** — Design and process markdown (this file, `TECHNICAL.md`, etc.).
@@ -21,7 +21,7 @@ src/
     popups/       # PopupProvider, modal bodies, popupRegistry
     PhaserGame.tsx
   game/           # Phaser scenes & containers only
-  examples/       # Boring demo (default shell via App.tsx)
+  examples/       # Chicken Rescue (default), other samples
   lib/            # API, store, singletons, audio helper
   config/         # icons, resources, audio (URLs + comments)
   assets/         # Small bundled UI chrome only (e.g. input borders)
