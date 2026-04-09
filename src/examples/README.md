@@ -2,7 +2,7 @@
 
 ## Chicken Rescue (`chickenRescue/`) — **default in `App.tsx`**
 
-Phaser mini-game with **MemoryRouter** routes (`/home`, `/game`), **MinigamePortalProvider**, and Chicken Rescue–specific economy actions (start run, GAMEOVER mints, etc.). Offline stub: **`lib/chickenRescueMachine.ts`**.
+Phaser mini-game with **MemoryRouter** routes (`/home`, `/game`), **MinigamePortalProvider**, and Chicken Rescue–specific economy actions (start run, GAMEOVER mints, **`CLAIM_FREE_WORMS`** daily drop on the home screen, etc.). Offline stub: **`lib/chickenRescueMachine.ts`** + **`lib/chickenRescueOfflineActions.ts`** (minimal `CLAIM_FREE_WORMS` with `collect.seconds: 0` for instant 3 worms without the API).
 
 ## Boring (`boring/`)
 

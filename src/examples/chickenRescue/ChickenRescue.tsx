@@ -3,6 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 
 import { MinigamePortalProvider } from "lib/portal";
 import { createChickenRescueOfflineMinigame } from "./lib/chickenRescueMachine";
+import { CHICKEN_RESCUE_OFFLINE_ACTIONS } from "./lib/chickenRescueOfflineActions";
 import { ChickenRescueRoutes } from "./ChickenRescueRoutes";
 
 /**
@@ -15,7 +16,7 @@ export const ChickenRescueApp: React.FC = () => {
   return (
     <MemoryRouter initialEntries={["/home"]}>
       <MinigamePortalProvider
-        offlineActions={{}}
+        offlineActions={CHICKEN_RESCUE_OFFLINE_ACTIONS}
         offlineMinigame={createChickenRescueOfflineMinigame}
       >
         <ChickenRescueRoutes />

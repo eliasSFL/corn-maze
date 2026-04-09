@@ -56,4 +56,4 @@ docs/             # Specs and guidelines
 ## Related docs
 
 - `TECHNICAL.md` — how to wire store and popups.
-- `API.md` — stub boundaries.
+- `API.md` — builder-oriented economy / portal guide; session + actions mental model; stub profile API notes.

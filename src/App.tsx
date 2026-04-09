@@ -8,5 +8,5 @@ import { HideAndSeekApp } from "examples/hideAndSeek/HideAndSeekApp";
  * {@link examples/ui-resources/UiResourcesApp} or another example from `src/examples/`.
  */
 export const App: React.FC = () => {
-  return <HideAndSeekApp />;
+  return <ChickenRescueApp />;
 };

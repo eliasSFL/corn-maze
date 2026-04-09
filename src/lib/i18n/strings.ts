@@ -17,6 +17,13 @@ export const EN_STRINGS: Record<string, string> = {
   "minigame.chickenRescue.collectChooksTitle": "Collect chooks",
   "minigame.chickenRescue.welcomeBody":
     "Pssst, are you looking for chooks? Use your worms and chicken feet to attract and catch them. Shops and wormeries are in Sunflower Land.",
+  "minigame.chickenRescue.freeWormsTitle": "Daily free worms",
+  "minigame.chickenRescue.freeWormsBodyInstant":
+    "Grab your daily gift — we’ll add 3 worms to your balance and sync with the server.",
+  "minigame.chickenRescue.freeWormsBodyTimed":
+    "This starts your daily worm drop. After about {{hours}} hours, collect 3 worms from your Wormery (production).",
+  "minigame.chickenRescue.freeWormsClaim": "Claim 3 worms",
+  "minigame.chickenRescue.freeWormsSkip": "Continue without claiming",
   "minigame.chickenRescue.gameOver": "Game over",
   "minigame.chickenRescue.resultsFoundChooks":
     "Congratulations, you found some chooks.",

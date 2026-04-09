@@ -20,6 +20,8 @@ export type ChickenRescuePortalActionIds = {
   startAdvanced: string;
   /** Advanced run end: mint golden `"2"` (optional normal `"1"` in API), burn `ADVANCED_GAME`. */
   gameOverAdvanced: string;
+  /** Daily free worms (`CLAIM_FREE_WORMS` or matched produce/collect rule). */
+  claimFreeWorms: string;
 };
 
 const DEFAULT_IDS: ChickenRescuePortalActionIds = {
@@ -27,6 +29,7 @@ const DEFAULT_IDS: ChickenRescuePortalActionIds = {
   gameOverBasic: "GAMEOVER",
   startAdvanced: "START_ADVANCED_GAME",
   gameOverAdvanced: "ADVANCED_GAMEOVER",
+  claimFreeWorms: "CLAIM_FREE_WORMS",
 };
 
 function asDef(raw: unknown): MinigameActionDefinition | null {
@@ -145,6 +148,43 @@ function matchesGameOverAdvanced(def: MinigameActionDefinition): boolean {
   return true;
 }
 
+/** Daily worms: produce + collect on token `"4"`, or mint-only on `"4"` (editor “custom”). */
+function matchesClaimFreeWorms(def: MinigameActionDefinition): boolean {
+  if (def.showInShop === true) {
+    return false;
+  }
+  if (isMintOnlyWormClaim(def)) {
+    return true;
+  }
+  const p = def.produce?.["4"];
+  const c = def.collect?.["4"];
+  if (!p || !c) {
+    return false;
+  }
+  if (!("amount" in c) || typeof c.amount !== "number" || c.amount <= 0) {
+    return false;
+  }
+  return typeof p === "object" && p !== null;
+}
+
+function isMintOnlyWormClaim(def: MinigameActionDefinition): boolean {
+  const m = def.mint?.["4"];
+  if (!m || typeof m !== "object" || !("amount" in m)) {
+    return false;
+  }
+  if ("min" in m || "max" in m || "dailyCap" in m) {
+    return false;
+  }
+  if (typeof (m as { amount: unknown }).amount !== "number") {
+    return false;
+  }
+  return (
+    recordIsEffectivelyEmpty(
+      def.produce as Record<string, unknown> | undefined,
+    ) && recordIsEffectivelyEmpty(def.collect as Record<string, unknown> | undefined)
+  );
+}
+
 function resolveOne(
   actions: Record<string, unknown>,
   canonical: string,
@@ -215,6 +255,15 @@ export function resolveChickenRescuePortalActionIds(
         matchesGameOverAdvanced,
       ),
       CONFIG.PORTAL_CR_ACTION_GAME_OVER_ADVANCED,
+    ),
+    claimFreeWorms: pickExistingActionId(
+      actions,
+      resolveOne(
+        actions,
+        DEFAULT_IDS.claimFreeWorms,
+        matchesClaimFreeWorms,
+      ),
+      undefined,
     ),
   };
 }

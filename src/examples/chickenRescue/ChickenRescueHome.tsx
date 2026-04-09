@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "components/ui/Modal";
@@ -17,12 +17,51 @@ import { chickenRescueHomeRootStyle } from "./lib/chickenRescueHomeLayout";
 import { closePortal, useMinigameSession } from "lib/portal";
 import { ChickenRescueHomeHUD } from "./components/ChickenRescueHomeHUD";
 import { useChickenRescueLifecycleDispatch } from "./lib/useChickenRescueLifecycleDispatch";
+import { useChickenRescueActionIds } from "./lib/useChickenRescueActionIds";
+import {
+  canShowFreeWormsClaimModal,
+  isMintOnlyWormGrant,
+  resolveClaimFreeWormsDurationMs,
+} from "./lib/chickenRescueFreeWorms";
+import type { PlayerEconomyActionDefinition } from "lib/portal/playerEconomyTypes";
 
 export const ChickenRescueHome: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useAppTranslation();
-  const { playerEconomy, clearApiError, apiError } = useMinigameSession();
-  const { startBasicRun, startAdvancedRun } = useChickenRescueLifecycleDispatch();
+  const actionIds = useChickenRescueActionIds();
+  const { playerEconomy, clearApiError, apiError, actions } = useMinigameSession();
+  const { startBasicRun, startAdvancedRun, claimFreeWorms } =
+    useChickenRescueLifecycleDispatch();
+
+  const [skipFreeWormsSession, setSkipFreeWormsSession] = useState(false);
+  const [freeWormsUiTick, setFreeWormsUiTick] = useState(0);
+  const [freeWormsError, setFreeWormsError] = useState<string | null>(null);
+
+  const showFreeWormsOffer = useMemo(
+    () =>
+      canShowFreeWormsClaimModal({
+        claimActionId: actionIds.claimFreeWorms,
+        actions,
+        playerEconomy,
+      }),
+    [actionIds.claimFreeWorms, actions, playerEconomy, freeWormsUiTick],
+  );
+  const showFreeWormsModal = showFreeWormsOffer && !skipFreeWormsSession;
+
+  const claimDef = actions[actionIds.claimFreeWorms] as
+    | PlayerEconomyActionDefinition
+    | undefined;
+  const claimWaitMs = resolveClaimFreeWormsDurationMs(claimDef);
+  const freeWormsBodyKey =
+    isMintOnlyWormGrant(claimDef) || claimWaitMs <= 0
+      ? "minigame.chickenRescue.freeWormsBodyInstant"
+      : "minigame.chickenRescue.freeWormsBodyTimed";
+  const freeWormsBody =
+    freeWormsBodyKey === "minigame.chickenRescue.freeWormsBodyTimed"
+      ? t(freeWormsBodyKey, {
+          hours: String(Math.max(1, Math.round(claimWaitMs / 3600000))),
+        })
+      : t(freeWormsBodyKey);
 
   const [huntStep, setHuntStep] = useState<"choose" | "confirm">("choose");
   const [pendingRun, setPendingRun] = useState<"basic" | "advanced" | null>(
@@ -59,6 +98,17 @@ export const ChickenRescueHome: React.FC = () => {
     closePortal(navigate);
   };
 
+  const onClaimFreeWorms = async () => {
+    setFreeWormsError(null);
+    clearApiError();
+    try {
+      await claimFreeWorms();
+      setFreeWormsUiTick((n) => n + 1);
+    } catch (e) {
+      setFreeWormsError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
   const confirmRunChoice = (run: "basic" | "advanced") => {
     setPendingRun(run);
     setHuntStep("confirm");
@@ -81,7 +131,36 @@ export const ChickenRescueHome: React.FC = () => {
     >
       <ChickenRescueHomeHUD />
 
-      {huntStep === "choose" && (
+      {showFreeWormsModal && (
+        <Modal show>
+          <Panel bumpkinParts={NPC_WEARABLES["pumpkin' pete"]}>
+            <div className="p-2">
+              <Label type="warning" className="mb-2" icon={wormIcon}>
+                {t("minigame.chickenRescue.freeWormsTitle")}
+              </Label>
+              <p className="text-xs leading-snug mb-3 opacity-90 text-[#3e2731]">
+                {freeWormsBody}
+              </p>
+              {(apiError || freeWormsError) && (
+                <p className="text-xs text-red-600 dark:text-red-400 mb-2 break-words">
+                  {freeWormsError ?? apiError}
+                </p>
+              )}
+              <Button className="w-full mb-1" onClick={() => void onClaimFreeWorms()}>
+                {t("minigame.chickenRescue.freeWormsClaim")}
+              </Button>
+              <Button
+                className="w-full"
+                onClick={() => setSkipFreeWormsSession(true)}
+              >
+                {t("minigame.chickenRescue.freeWormsSkip")}
+              </Button>
+            </div>
+          </Panel>
+        </Modal>
+      )}
+
+      {!showFreeWormsModal && huntStep === "choose" && (
         <Modal show>
           <Panel bumpkinParts={NPC_WEARABLES["pumpkin' pete"]}>
             <div className="p-2">

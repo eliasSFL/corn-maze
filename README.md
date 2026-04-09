@@ -39,7 +39,7 @@ All contributor and **AI-agent-oriented** guidelines live in **`docs/`**:
 | [docs/GAME_SPEC.md](docs/GAME_SPEC.md) | **Your** game rules — edit this as you design |
 | [docs/DESIGN.md](docs/DESIGN.md) | Sunflower Land tone, loops, economy philosophy |
 | [docs/UI_UX_GUIDELINES.md](docs/UI_UX_GUIDELINES.md) | Panels, labels, mobile-first UI |
-| [docs/API.md](docs/API.md) | Stub API surface (`src/lib/api.ts`) |
+| [docs/API.md](docs/API.md) | Builder guide: economy + portal usage; `src/lib/portal/`; stub profile (`src/lib/api.ts`) |
 | [docs/ART.md](docs/ART.md) | Pixel-art-only rules |
 | [docs/AUDIO.md](docs/AUDIO.md) | Sound style + config |
 | [docs/VALIDATION.md](docs/VALIDATION.md) | **Manual** pre-ship checklist (win / retry / playable) |
