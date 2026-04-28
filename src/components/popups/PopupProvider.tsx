@@ -3,9 +3,6 @@ import { popupSingleton } from "lib/popupSingleton";
 import type { PopupId } from "lib/popups";
 import { $activePopupId } from "lib/popupActiveStore";
 import { POPUP_REGISTRY } from "components/popups/popupRegistry";
-import { markHideAndSeekRewardClaimed } from "examples/hideAndSeek/lib/hideAndSeekRoundStore";
-import { resumeHideAndSeekPhaserPhysics } from "examples/hideAndSeek/lib/hideAndSeekSceneRef";
-import { requestClosePortal } from "lib/portal/closePortal";
 
 export function PopupProvider({
   children,
@@ -18,16 +15,7 @@ export function PopupProvider({
   } | null>(null);
 
   const close = useCallback(() => {
-    setCurrent((prev) => {
-      if (prev?.id === "hideAndSeekClaim") {
-        markHideAndSeekRewardClaimed();
-        resumeHideAndSeekPhaserPhysics();
-      }
-      if (prev?.id === "hideAndSeekGameOver" || prev?.id === "hideAndSeekClaim") {
-        requestClosePortal();
-      }
-      return null;
-    });
+    setCurrent(null);
   }, []);
 
   const open = useCallback(

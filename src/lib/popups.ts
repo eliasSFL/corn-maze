@@ -2,13 +2,7 @@
  * Popup identifiers. Register matching React content in `components/popups/popupRegistry.tsx`.
  * One modal visible at a time (see docs/TECHNICAL.md).
  */
-export const POPUP_IDS = [
-  "welcome",
-  "hint",
-  "hideAndSeekWelcome",
-  "hideAndSeekGameOver",
-  "hideAndSeekClaim",
-] as const;
+export const POPUP_IDS = ["welcome", "hint"] as const;
 
 export type PopupId = (typeof POPUP_IDS)[number];
 

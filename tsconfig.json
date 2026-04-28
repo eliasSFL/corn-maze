@@ -24,8 +24,8 @@
       "assets/*": ["src/assets/*"],
       "config/*": ["src/config/*"],
       "examples/*": ["src/examples/*"],
-      "features/world/*": ["src/examples/chickenRescue/world/*"],
-      "example-assets/*": ["src/examples/chickenRescue/assets/*"],
+      "features/world/*": ["src/examples/cornMaze/world/*"],
+      "example-assets/*": ["src/examples/cornMaze/assets/*"],
       "@sl-assets/*": ["../images/assets/*"]
     }
   },
