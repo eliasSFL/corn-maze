@@ -1,13 +1,21 @@
 import React from "react";
+import { MemoryRouter } from "react-router-dom";
+import { MinigamePortalProvider } from "lib/portal";
+
+import { CornMazeRoutes } from "./CornMazeRoutes";
 
 /**
- * Placeholder shell. Real implementation lands in batch 2 of the port:
- * MemoryRouter + MinigamePortalProvider + Routes (home / game).
+ * MemoryRouter keeps `/home` ↔ `/game` navigation off the iframe URL. The
+ * minigames API isn't used by this portal yet (no online lifecycle calls),
+ * so the offline branch of `MinigamePortalProvider` is sufficient — we
+ * leave `offlineActions` / `offlineMinigame` defaults.
  */
 export const CornMazeApp: React.FC = () => {
   return (
-    <div className="flex h-screen w-screen items-center justify-center bg-black text-white">
-      <p className="text-sm">{"corn maze portal — wiring up..."}</p>
-    </div>
+    <MemoryRouter initialEntries={["/home"]}>
+      <MinigamePortalProvider offlineActions={{}}>
+        <CornMazeRoutes />
+      </MinigamePortalProvider>
+    </MemoryRouter>
   );
 };
