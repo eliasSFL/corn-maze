@@ -2,6 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --text-xxs-size: 20px;
+  --text-xxs-line-height: 12px;
+
+  --text-xs-size: 24px;
+  --text-xs-line-height: 14px;
+
+  --text-sm-size: 30px;
+  --text-sm-line-height: 36px;
+
+  --text-base-size: 36px;
+  --text-base-line-height: 42px;
+
+  --text-lg-size: 42px;
+}
+
+.text-xxs {
+  font-size: var(--text-xxs-size);
+  line-height: var(--text-xxs-line-height);
+}
+
+.text-xs {
+  font-size: var(--text-xs-size);
+  line-height: var(--text-xs-line-height);
+}
+
+.text-sm {
+  font-size: var(--text-sm-size);
+  line-height: var(--text-sm-line-height);
+}
+
+.text-base {
+  font-size: var(--text-base-size);
+  line-height: var(--text-base-line-height);
+}
+
+.text-lg {
+  font-size: var(--text-lg-size);
+  line-height: var(--text-lg-line-height);
+}
+
+@font-face {
+  font-family: "Teeny";
+  src: url("https://sunflower-land.com/testnet-assets/fonts/Teeny.otf");
+}
+
+@font-face {
+  font-family: "Basic";
+  src: url("https://sunflower-land.com/testnet-assets/fonts/Hint.ttf");
+}
+
+@font-face {
+  font-family: "Secondary";
+  src: url("https://sunflower-land.com/testnet-assets/fonts/Secondary.ttf");
+}
+
+@font-face {
+  font-family: "Ark";
+  src: url("https://sunflower-land.com/testnet-assets/fonts/ark-pixel-zh_cn.ttf");
+}
+
 html,
 body,
 #root {
@@ -10,8 +71,11 @@ body,
 }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, sans-serif;
+  font-family: "Basic", "Ark", sans-serif;
+  color: #181425;
+  font-size: var(--text-sm-size);
+  line-height: var(--text-sm-line-height);
+  -webkit-font-smoothing: antialiased;
 }
 
 /**
