@@ -18,7 +18,7 @@ export const HudContainer: React.FC<React.PropsWithChildren> = ({
             onMouseUp={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
             onTouchEnd={(e) => e.stopPropagation()}
-            className="pointer-events-auto h-full w-full"
+            className="pointer-events-auto"
           >
             {children}
           </div>
