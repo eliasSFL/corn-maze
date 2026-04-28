@@ -40,7 +40,9 @@ const playerModalManager = {
   open: (_opts: { id: number; clothing: any; experience: number }) => {},
 };
 
-export const WALKING_SPEED = 40;
+// Bumped from the chickenRescue default (40) to match the original portal-fork
+// pace. Corn maze's enemy patrols are tuned around the 50 px/s player speed.
+export const WALKING_SPEED = 50;
 
 export type NPCBumpkin = {
   x: number;

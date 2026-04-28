@@ -59,6 +59,10 @@ export const CornMazeGame: React.FC<{
     game.current = new Game(config);
     game.current.registry.set("initialScene", initialScene);
     game.current.registry.set("id", farmId);
+    // BaseScene reads `gameState.faction?.name` and `gameState.bumpkin?.equipped`
+    // at create() time — register a stub so the optional chains don't throw on
+    // a fresh portal session that has no main-game state attached.
+    game.current.registry.set("gameState", {});
 
     return () => {
       game.current?.destroy(true);
