@@ -40,6 +40,12 @@ export const SOUNDS = {
     maze_over: sfx(
       "/sfx/Fishing/Notification/Farm_Game_Fishing_Notification_Negative_Unsuccessful_Catch_3_Fail_Capture_Sad_Complete_Fish.mp3",
     ),
+    crow_collected: sfx("/sfx/Notifications/crow_collected.mp3"),
+  },
+  voices: {
+    ouph: sfx(
+      "/sfx/Animals/Human/Farm_Game_Animal_Vocal_Human_Character_Voice_Farmer_Ouph_Pain.mp3",
+    ),
   },
   resources: {
     chicken_1: sfx(

@@ -17,6 +17,13 @@ export const SPAWNS: () => SpawnLocation = () => ({
       y: 200,
     },
   },
+  corn_maze: {
+    // Just below-left of Luna (333, 330) — in the open path, not the corn wall.
+    default: {
+      x: 310,
+      y: 345,
+    },
+  },
   portal_example: {
     default: {
       x: 400 + randomXOffset,

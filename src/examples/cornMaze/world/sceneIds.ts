@@ -11,6 +11,7 @@ export type SceneId =
   | "mushroom_forest"
   | "retreat"
   | "chicken_rescue"
+  | "corn_maze"
   | "kingdom"
   | "faction_house"
   | "goblin_house"
