@@ -1,6 +1,7 @@
 import Phaser, { Physics } from "phaser";
 
 import VirtualJoystick from "phaser3-rex-plugins/plugins/virtualjoystick.js";
+import { isTouchDevice } from "../lib/device";
 
 import { BumpkinContainer } from "../containers/BumpkinContainer";
 import { NPCName, NPC_WEARABLES } from "lib/npcs";
@@ -484,6 +485,21 @@ export abstract class BaseScene extends Phaser.Scene {
   }
 
   public initialiseControls() {
+    // Initialise on-screen joystick on touch devices. The update loop reads
+    // `this.joystick?.force` / `.angle` to drive `movementAngle`, so without
+    // this there's no way to move the player on mobile.
+    if (isTouchDevice()) {
+      const { centerX, centerY, height } = this.cameras.main;
+      this.joystick = new VirtualJoystick(this, {
+        x: centerX,
+        y: centerY - 35 + height / this.zoom / 2,
+        radius: 15,
+        base: this.add.circle(0, 0, 15, 0x000000, 0.2).setDepth(1_000_000_000),
+        thumb: this.add.circle(0, 0, 7, 0xffffff, 0.2).setDepth(1_000_000_000),
+        forceMin: 2,
+      });
+    }
+
     // Initialise Keyboard
     this.cursorKeys = this.input.keyboard?.createCursorKeys();
     if (this.cursorKeys) {
