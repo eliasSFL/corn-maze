@@ -23,11 +23,10 @@ export function cloneMinigameSnapshot(
     dailyActivity: { ...m.dailyActivity },
     dailyMinted: { utcDay: dm.utcDay, minted: { ...dm.minted } },
   };
-  if (m.dailyActionUses) {
-    base.dailyActionUses = {
-      utcDay: m.dailyActionUses.utcDay,
-      byAction: { ...m.dailyActionUses.byAction },
-    };
+  if (m.rules && Object.keys(m.rules).length > 0) {
+    base.rules = Object.fromEntries(
+      Object.entries(m.rules).map(([id, rec]) => [id, { ranAt: rec.ranAt }]),
+    );
   }
   if (m.purchaseCounts != null) {
     base.purchaseCounts = { ...m.purchaseCounts };
@@ -49,12 +48,14 @@ export function minigameSessionToRuntime(
     activity: m.activity,
     dailyActivity: { ...m.dailyActivity },
     dailyMinted: { utcDay: dm.utcDay, minted: { ...dm.minted } },
-    ...(m.dailyActionUses
+    ...(m.rules && Object.keys(m.rules).length > 0
       ? {
-          dailyActionUses: {
-            utcDay: m.dailyActionUses.utcDay,
-            byAction: { ...m.dailyActionUses.byAction },
-          },
+          rules: Object.fromEntries(
+            Object.entries(m.rules).map(([id, rec]) => [
+              id,
+              { ranAt: rec.ranAt },
+            ]),
+          ),
         }
       : {}),
     ...(m.purchaseCounts != null
@@ -78,11 +79,10 @@ export function runtimeToMinigameSession(
       minted: { ...r.dailyMinted.minted },
     },
   };
-  if (r.dailyActionUses) {
-    base.dailyActionUses = {
-      utcDay: r.dailyActionUses.utcDay,
-      byAction: { ...r.dailyActionUses.byAction },
-    };
+  if (r.rules && Object.keys(r.rules).length > 0) {
+    base.rules = Object.fromEntries(
+      Object.entries(r.rules).map(([id, rec]) => [id, { ranAt: rec.ranAt }]),
+    );
   }
   if (r.purchaseCounts != null) {
     base.purchaseCounts = { ...r.purchaseCounts };
@@ -104,11 +104,10 @@ export function normalizeMinigameFromApi(
     dailyActivity: { ...raw.dailyActivity },
     dailyMinted: { utcDay: dm.utcDay, minted: { ...dm.minted } },
   };
-  if (raw.dailyActionUses) {
-    base.dailyActionUses = {
-      utcDay: raw.dailyActionUses.utcDay,
-      byAction: { ...raw.dailyActionUses.byAction },
-    };
+  if (raw.rules && Object.keys(raw.rules).length > 0) {
+    base.rules = Object.fromEntries(
+      Object.entries(raw.rules).map(([id, rec]) => [id, { ranAt: rec.ranAt }]),
+    );
   }
   if (raw.purchaseCounts != null) {
     base.purchaseCounts = { ...raw.purchaseCounts };
@@ -140,10 +139,7 @@ export function mergeMinigameEconomyFromApi(
   return {
     ...next,
     balances,
-    dailyActionUses:
-      next.dailyActionUses !== undefined
-        ? next.dailyActionUses
-        : prev.dailyActionUses,
+    rules: next.rules !== undefined ? next.rules : prev.rules,
     purchaseCounts:
       next.purchaseCounts !== undefined
         ? next.purchaseCounts

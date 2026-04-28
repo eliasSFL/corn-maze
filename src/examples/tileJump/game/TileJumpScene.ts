@@ -39,44 +39,78 @@ const WORLD_W = (COLS + 16) * TILE_SIZE;
 const WORLD_H = (ROWS + 12) * TILE_SIZE;
 
 // ── Snake path ───────────────────────────────────────────────────────────────
+// Dev toggle: tint every safe tile blue so the path is visible while designing.
+const SHOW_DEBUG_SAFE_PATH = true;
+
+// Serpentine "1-wide corridor" path: straight rows at rows 14, 12, 10, 8, 6, 4, 2,
+// connected by single vertical tiles at alternating edges. Because the horizontal
+// runs are separated by a blank row (and the vertical connectors are in alternating
+// columns), no two path tiles are adjacent unless they are consecutive in the path.
+// ⇒ At any moment the player has exactly one correct direction (plus "back").
 const SAFE_PATH: { col: number; row: number }[] = [
+  // Row 14 — right edge
   { col: 3, row: 14 },
   { col: 4, row: 14 },
   { col: 5, row: 14 },
-  { col: 5, row: 13 },
+  { col: 6, row: 14 },
+  // Up the right wall
   { col: 6, row: 13 },
   { col: 6, row: 12 },
-  { col: 6, row: 11 },
-  { col: 5, row: 11 },
-  { col: 4, row: 11 },
+  // Row 12 — sweep left
+  { col: 5, row: 12 },
   { col: 4, row: 12 },
   { col: 3, row: 12 },
   { col: 2, row: 12 },
-  { col: 2, row: 11 },
-  { col: 1, row: 11 },
-  { col: 1, row: 10 },
+  { col: 1, row: 12 },
+  { col: 0, row: 12 },
+  // Up the left wall
+  { col: 0, row: 11 },
   { col: 0, row: 10 },
-  { col: 0, row: 9 },
-  { col: 0, row: 8 },
-  { col: 0, row: 7 },
-  { col: 1, row: 7 },
-  { col: 2, row: 7 },
-  { col: 2, row: 8 },
-  { col: 3, row: 8 },
-  { col: 3, row: 9 },
-  { col: 4, row: 9 },
-  { col: 5, row: 9 },
+  // Row 10 — sweep right
+  { col: 1, row: 10 },
+  { col: 2, row: 10 },
+  { col: 3, row: 10 },
+  { col: 4, row: 10 },
+  { col: 5, row: 10 },
+  { col: 6, row: 10 },
+  // Up the right wall
   { col: 6, row: 9 },
   { col: 6, row: 8 },
-  { col: 6, row: 7 },
+  // Row 8 — sweep left
+  { col: 5, row: 8 },
+  { col: 4, row: 8 },
+  { col: 3, row: 8 },
+  { col: 2, row: 8 },
+  { col: 1, row: 8 },
+  { col: 0, row: 8 },
+  // Up the left wall
+  { col: 0, row: 7 },
+  { col: 0, row: 6 },
+  // Row 6 — sweep right
+  { col: 1, row: 6 },
+  { col: 2, row: 6 },
+  { col: 3, row: 6 },
+  { col: 4, row: 6 },
+  { col: 5, row: 6 },
   { col: 6, row: 6 },
+  // Up the right wall
   { col: 6, row: 5 },
-  { col: 5, row: 5 },
+  { col: 6, row: 4 },
+  // Row 4 — sweep left
   { col: 5, row: 4 },
   { col: 4, row: 4 },
-  { col: 4, row: 3 },
-  { col: 4, row: 2 },
+  { col: 3, row: 4 },
+  { col: 2, row: 4 },
+  { col: 1, row: 4 },
+  { col: 0, row: 4 },
+  // Up the left wall
+  { col: 0, row: 3 },
+  { col: 0, row: 2 },
+  // Row 2 — sweep right to center
+  { col: 1, row: 2 },
+  { col: 2, row: 2 },
   { col: 3, row: 2 },
+  // Up to finish
   { col: 3, row: 1 },
   { col: 3, row: 0 },
 ];
@@ -397,7 +431,10 @@ export class TileJumpScene extends Phaser.Scene {
           .rectangle(x, y, TILE_SIZE - 1, TILE_SIZE - 1, COLOR_TILE_BORDER)
           .setDepth(DEPTH_TILES - 1);
 
-        const fillColor = COLOR_TILE_DEFAULT;
+        const fillColor =
+          SHOW_DEBUG_SAFE_PATH && isSafeTile(col, row)
+            ? COLOR_TILE_SAFE
+            : COLOR_TILE_DEFAULT;
         const tile = this.add
           .rectangle(x, y, TILE_SIZE - 3, TILE_SIZE - 3, fillColor)
           .setDepth(DEPTH_TILES);
@@ -833,9 +870,12 @@ export class TileJumpScene extends Phaser.Scene {
     for (let row = 0; row < ROWS; row++) {
       for (let col = 0; col < COLS; col++) {
         const tile = this.tileSprites[row]?.[col];
-        if (tile) {
-          tile.setFillStyle(COLOR_TILE_DEFAULT);
-        }
+        if (!tile) continue;
+        const baseColor =
+          SHOW_DEBUG_SAFE_PATH && isSafeTile(col, row)
+            ? COLOR_TILE_SAFE
+            : COLOR_TILE_DEFAULT;
+        tile.setFillStyle(baseColor);
       }
     }
   }

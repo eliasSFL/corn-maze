@@ -20,7 +20,7 @@ export function markFreeWormsClaimedForUtcDay(): void {
   }
 }
 
-/** After starting a delayed produce job (e.g. `collect.seconds` &gt; 0) without `maxUsesPerDay`. */
+/** After starting a delayed produce job (e.g. `collect.seconds` &gt; 0) without server `rules` cooldown. */
 export function markFreeWormsTimerStartedForUtcDay(): void {
   try {
     sessionStorage.setItem(
@@ -119,14 +119,13 @@ export function canShowFreeWormsClaimModal(input: {
     return false;
   }
   const def = actions[claimActionId] as EconomyActionDefinition;
-  const cap = def?.maxUsesPerDay;
-  if (typeof cap === "number" && cap > 0) {
-    const bucket = playerEconomy.dailyActionUses;
-    const day = utcCalendarDay(now);
-    if (!bucket || bucket.utcDay !== day) {
-      return true;
+  const cd = def?.cooldownSeconds;
+  if (typeof cd === "number" && cd > 0) {
+    const last = playerEconomy.rules?.[claimActionId]?.ranAt;
+    if (last != null && now - last < cd * 1000) {
+      return false;
     }
-    return (bucket.byAction[claimActionId] ?? 0) < cap;
+    return true;
   }
   if (hasClientTrackedFreeWormsTimerStartToday()) {
     return false;

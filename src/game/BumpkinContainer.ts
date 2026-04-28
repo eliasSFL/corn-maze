@@ -19,8 +19,12 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
   private silhouette: Phaser.GameObjects.Sprite | undefined;
   private ready = false;
   private spriteKey = "";
+  private spriteKey2 = "";
   private idleAnimationKey = "";
   private walkingAnimationKey = "";
+  private digAnimationKey = "";
+  private drillAnimationKey = "";
+  private wateringAnimationKey = "";
   private direction: "left" | "right" = "right";
   public clothing: BumpkinClothing;
   private readonly tokenParts: string;
@@ -69,8 +73,12 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
 
   private loadSprites(scene: Phaser.Scene) {
     this.spriteKey = `bumpkin_${this.tokenParts}`;
+    this.spriteKey2 = `bumpkin2_${this.tokenParts}`;
     this.idleAnimationKey = `${this.spriteKey}-idle`;
     this.walkingAnimationKey = `${this.spriteKey}-walk`;
+    this.digAnimationKey = `${this.spriteKey}-dig`;
+    this.drillAnimationKey = `${this.spriteKey}-drill`;
+    this.wateringAnimationKey = `${this.spriteKey}-watering`;
 
     if (scene.textures.exists(this.spriteKey)) {
       this.ensureAnims(scene);
@@ -78,7 +86,10 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
       return;
     }
 
-    const url = `${animationBaseUrl()}/animate/0_v1_${this.tokenParts}/idle_walking_dig_drilling`;
+    const base = animationBaseUrl();
+
+    // Primary sheet: idle, walking, dig, drilling, watering (all on one texture)
+    const url = `${base}/animate/0_v1_${this.tokenParts}/idle_walking_dig_drilling_watering`;
     scene.load.spritesheet(this.spriteKey, url, {
       frameWidth: 96,
       frameHeight: 64,
@@ -124,6 +135,48 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
         repeat: -1,
         frameRate: 10,
       });
+    }
+    if (!scene.anims.exists(this.digAnimationKey)) {
+      scene.anims.create({
+        key: this.digAnimationKey,
+        frames: scene.anims.generateFrameNumbers(this.spriteKey, {
+          start: 17,
+          end: 29,
+        }),
+        repeat: -1,
+        frameRate: 10,
+      });
+    }
+    if (!scene.anims.exists(this.drillAnimationKey)) {
+      scene.anims.create({
+        key: this.drillAnimationKey,
+        frames: scene.anims.generateFrameNumbers(this.spriteKey, {
+          start: 30,
+          end: 38,
+        }),
+        repeat: -1,
+        frameRate: 10,
+      });
+    }
+
+    // Watering: starts after drilling (frame 39) through end of sheet
+    if (
+      !scene.anims.exists(this.wateringAnimationKey) &&
+      scene.textures.exists(this.spriteKey)
+    ) {
+      const totalFrames =
+        scene.textures.get(this.spriteKey).frameTotal - 1; // -1 for __BASE
+      if (totalFrames > 39) {
+        scene.anims.create({
+          key: this.wateringAnimationKey,
+          frames: scene.anims.generateFrameNumbers(this.spriteKey, {
+            start: 39,
+            end: totalFrames - 1,
+          }),
+          repeat: -1,
+          frameRate: 10,
+        });
+      }
     }
   }
 
@@ -182,6 +235,45 @@ export class BumpkinContainer extends Phaser.GameObjects.Container {
     }
     if (this.sprite.anims.getName() !== this.idleAnimationKey) {
       this.sprite.anims.play(this.idleAnimationKey, true);
+    }
+  }
+
+  dig() {
+    if (
+      !this.ready ||
+      !this.sprite?.anims ||
+      !this.scene?.anims.exists(this.digAnimationKey)
+    ) {
+      return;
+    }
+    if (this.sprite.anims.getName() !== this.digAnimationKey) {
+      this.sprite.anims.play(this.digAnimationKey, true);
+    }
+  }
+
+  drill() {
+    if (
+      !this.ready ||
+      !this.sprite?.anims ||
+      !this.scene?.anims.exists(this.drillAnimationKey)
+    ) {
+      return;
+    }
+    if (this.sprite.anims.getName() !== this.drillAnimationKey) {
+      this.sprite.anims.play(this.drillAnimationKey, true);
+    }
+  }
+
+  watering() {
+    if (
+      !this.ready ||
+      !this.sprite?.anims ||
+      !this.scene?.anims.exists(this.wateringAnimationKey)
+    ) {
+      return;
+    }
+    if (this.sprite.anims.getName() !== this.wateringAnimationKey) {
+      this.sprite.anims.play(this.wateringAnimationKey, true);
     }
   }
 }

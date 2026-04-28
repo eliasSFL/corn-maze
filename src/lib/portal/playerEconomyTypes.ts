@@ -13,7 +13,8 @@ export type EconomyActionType = "shop" | "generator" | "custom";
 export type EconomyActionDefinition = {
   type?: EconomyActionType;
   showInShop?: boolean;
-  maxUsesPerDay?: number;
+  /** Seconds after last successful run (`rules[actionId].ranAt`) before this action may run again. */
+  cooldownSeconds?: number;
   purchaseLimit?: number;
   require?: Record<string, { amount: number }>;
   requireBelow?: Record<string, number>;
@@ -89,9 +90,8 @@ export type PlayerEconomyDailyActivity = {
   count: number;
 };
 
-export type DailyActionUsesBucket = {
-  utcDay: string;
-  byAction: Record<string, number>;
+export type PlayerEconomyRuleRunRecord = {
+  ranAt: number;
 };
 
 export type PlayerEconomyRuntimeState = {
@@ -100,7 +100,8 @@ export type PlayerEconomyRuntimeState = {
   dailyMinted: DailyMintBucket;
   activity: number;
   dailyActivity: PlayerEconomyDailyActivity;
-  dailyActionUses?: DailyActionUsesBucket;
+  /** Per action id: last successful economy action completion time (ms). */
+  rules?: Record<string, PlayerEconomyRuleRunRecord>;
   /** Per-action purchase counts when `purchaseLimit` is used on shop rules. */
   purchaseCounts?: Record<string, number>;
 };

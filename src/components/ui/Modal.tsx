@@ -5,7 +5,8 @@ export const Modal: React.FC<{
   show: boolean;
   children: React.ReactNode;
   className?: string;
-}> = ({ show, children, className }) => {
+  onHide?: () => void;
+}> = ({ show, children, className, onHide }) => {
   if (!show) {
     return null;
   }
@@ -17,6 +18,9 @@ export const Modal: React.FC<{
       )}
       role="dialog"
       aria-modal="true"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && onHide) onHide();
+      }}
     >
       {children}
     </div>

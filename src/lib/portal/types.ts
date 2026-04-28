@@ -46,7 +46,7 @@ export type MinigameSessionResponse = {
     dailyActivity: { date: string; count: number };
     /** Present when API returns the extended player economy payload. */
     dailyMinted?: { utcDay: string; minted: Record<string, number> };
-    dailyActionUses?: { utcDay: string; byAction: Record<string, number> };
+    rules?: Record<string, { ranAt: number }>;
     purchaseCounts?: Record<string, number>;
     /** Some responses mirror `items` inside `playerEconomy`. */
     items?: Record<string, PlayerEconomyBalanceItem>;

@@ -1,6 +1,5 @@
 import { resolveProduceDurationMs } from "./resolveProduceDuration";
 import {
-  DailyActionUsesBucket,
   DailyMintBucket,
   EconomyActionDefinition,
   PlayerEconomyConfig,
@@ -124,8 +123,8 @@ function isFixedMintWithDailyCap(
 export function clonePlayerEconomyRuntimeState(
   state: PlayerEconomyRuntimeState,
 ): PlayerEconomyRuntimeState {
-  const uses = state.dailyActionUses;
   const purchases = state.purchaseCounts;
+  const rules = state.rules;
   return {
     balances: { ...state.balances },
     generating: Object.fromEntries(
@@ -140,12 +139,11 @@ export function clonePlayerEconomyRuntimeState(
       date: state.dailyActivity.date,
       count: state.dailyActivity.count,
     },
-    ...(uses
+    ...(rules && Object.keys(rules).length > 0
       ? {
-          dailyActionUses: {
-            utcDay: uses.utcDay,
-            byAction: { ...uses.byAction },
-          },
+          rules: Object.fromEntries(
+            Object.entries(rules).map(([id, rec]) => [id, { ranAt: rec.ranAt }]),
+          ),
         }
       : {}),
     ...(purchases && Object.keys(purchases).length > 0
@@ -501,15 +499,21 @@ function applyCollect(
   return { grants: [{ token, amount: grant }] };
 }
 
-function rolloverDailyActionUsesIfNeeded(
-  bucket: PlayerEconomyRuntimeState["dailyActionUses"] | undefined,
+function checkActionCooldownSeconds(
+  def: EconomyActionDefinition,
+  actionId: string,
+  state: PlayerEconomyRuntimeState,
   now: number,
-): DailyActionUsesBucket {
-  const today = utcCalendarDay(now);
-  if (!bucket || bucket.utcDay !== today) {
-    return { utcDay: today, byAction: {} };
+): string | undefined {
+  const sec = def.cooldownSeconds;
+  if (sec === undefined || !Number.isFinite(sec) || sec <= 0) {
+    return undefined;
   }
-  return { utcDay: bucket.utcDay, byAction: { ...bucket.byAction } };
+  const last = state.rules?.[actionId]?.ranAt;
+  if (last !== undefined && now - last < sec * 1000) {
+    return "This action is on cooldown";
+  }
+  return undefined;
 }
 
 function checkPurchaseLimit(
@@ -543,22 +547,6 @@ function incrementPurchaseCountIfNeeded(
     ...prev,
     [actionId]: (prev[actionId] ?? 0) + 1,
   };
-}
-
-function checkMaxUsesPerDay(
-  def: EconomyActionDefinition,
-  actionId: string,
-  dailyActionUses: PlayerEconomyRuntimeState["dailyActionUses"],
-  now: number,
-): string | undefined {
-  const cap = def.maxUsesPerDay;
-  if (cap === undefined || cap <= 0) return undefined;
-  const bucket = rolloverDailyActionUsesIfNeeded(dailyActionUses, now);
-  const used = bucket.byAction[actionId] ?? 0;
-  if (used >= cap) {
-    return "Daily limit reached for this action";
-  }
-  return undefined;
 }
 
 function runPhases(
@@ -646,14 +634,14 @@ export function processPlayerEconomyAction(
   const working = clonePlayerEconomyRuntimeState(state);
   rolloverDailyMintedIfNeeded(working.dailyMinted, input.now);
 
-  const errCap = checkMaxUsesPerDay(
+  const errCooldown = checkActionCooldownSeconds(
     def,
     input.actionId,
-    working.dailyActionUses,
+    working,
     input.now,
   );
-  if (errCap) {
-    return { ok: false, error: errCap };
+  if (errCooldown) {
+    return { ok: false, error: errCooldown };
   }
 
   const errPurchaseLimit = checkPurchaseLimit(
@@ -678,15 +666,10 @@ export function processPlayerEconomyAction(
 
   recordSuccessfulMinigameAction(working, input.now);
 
-  if (def.maxUsesPerDay !== undefined && def.maxUsesPerDay > 0) {
-    const rolled = rolloverDailyActionUsesIfNeeded(
-      working.dailyActionUses,
-      input.now,
-    );
-    const id = input.actionId;
-    rolled.byAction[id] = (rolled.byAction[id] ?? 0) + 1;
-    working.dailyActionUses = rolled;
-  }
+  working.rules = {
+    ...(working.rules ?? {}),
+    [input.actionId]: { ranAt: input.now },
+  };
 
   incrementPurchaseCountIfNeeded(working, def, input.actionId, input.itemId);
 
@@ -708,7 +691,6 @@ export function emptyPlayerEconomyState(
     dailyMinted: { utcDay: day, minted: {} },
     activity: 0,
     dailyActivity: { date: day, count: 0 },
-    dailyActionUses: { utcDay: day, byAction: {} },
     purchaseCounts: {},
   };
 }

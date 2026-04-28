@@ -176,6 +176,18 @@ export function MinigameSessionProvider({
         bootstrap.economyMeta?.items,
       );
       if (!next.ok) {
+        if (import.meta.env?.DEV) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            "[MinigameSession] dispatch failed",
+            {
+              actionId: optimistic.actionId,
+              error: next.error,
+              availableActions: Object.keys(bootstrap.actions ?? {}),
+              apiMode: !!getMinigamesApiUrl(),
+            },
+          );
+        }
         return { ok: false, error: next.error };
       }
       runAfterLocalEconomyCommit(rollback, next.playerEconomy, input);
